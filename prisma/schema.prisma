@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User Profile ─────────────────────────────────────────────────────────────
+model UserProfile {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String?
+  passwordHash      String   // bcrypt hash — never store plaintext
+  role              String   @default("USER") // USER | ADMIN
+  monthlyIncome     Float?
+  employmentType    String?  // SALARIED | SELF_EMPLOYED | OTHER
+  creditScoreRange  String?  // EXCELLENT | GOOD | FAIR | POOR | UNKNOWN
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  loanCalculations    LoanCalculation[]
+  loanComparisons     LoanComparison[]
+  readinessAssessments ReadinessAssessment[]
+  savedScenarios      SavedScenario[]
+
+  @@index([email])
+  @@map("user_profiles")
+}
+
+// ─── Lender ───────────────────────────────────────────────────────────────────
+model Lender {
+  id           String   @id @default(cuid())
+  name         String
+  shortName    String
+  logoUrl      String?
+  website      String?
+  type         String   // PUBLIC_BANK | PRIVATE_BANK | NBFC | COOPERATIVE
+  isActive     Boolean  @default(true)
+  isMock       Boolean  @default(false) // demo/seed data flag
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  loanProducts LoanProduct[]
+
+  @@index([isActive])
+  @@map("lenders")
+}
+
+// ─── Loan Product ─────────────────────────────────────────────────────────────
+model LoanProduct {
+  id                  String   @id @default(cuid())
+  lenderId            String
+  lender              Lender   @relation(fields: [lenderId], references: [id])
+  loanType            String   // PERSONAL | HOME | EDUCATION | VEHICLE | BUSINESS
+  productName         String
+  minInterestRate     Float    // annual %
+  maxInterestRate     Float    // annual %
+  minAmount           Float    // INR
+  maxAmount           Float    // INR
+  minTenureMonths     Int
+  maxTenureMonths     Int
+  processingFeeType   String   // FLAT | PERCENTAGE
+  processingFeeValue  Float    // flat INR or percentage
+  processingFeeMin    Float?   // minimum fee cap
+  processingFeeMax    Float?   // maximum fee cap
+  eligibilitySummary  String   // human-readable eligibility text
+  minCreditScore      Int?     // minimum indicative CIBIL score
+  minIncome           Float?   // minimum monthly income in INR
+  isActive            Boolean  @default(true)
+  isMock              Boolean  @default(false)
+  dataSource          String?  // source of rate data
+  lastVerifiedAt      DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  comparisonItems LoanComparisonItem[]
+
+  @@index([loanType, isActive])
+  @@index([lenderId])
+  @@map("loan_products")
+}
+
+// ─── Loan Calculation ─────────────────────────────────────────────────────────
+model LoanCalculation {
+  id               String   @id @default(cuid())
+  userId           String
+  user             UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loanType         String?
+  loanAmount       Float
+  annualRate       Float
+  tenureMonths     Int
+  processingFee    Float    @default(0)
+  monthlyEmi       Float
+  totalInterest    Float
+  totalRepayment   Float
+  upfrontFee       Float
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@map("loan_calculations")
+}
+
+// ─── Loan Comparison ─────────────────────────────────────────────────────────
+model LoanComparison {
+  id        String   @id @default(cuid())
+  userId    String
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String   @default("My Comparison")
+  loanType  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items LoanComparisonItem[]
+
+  @@index([userId])
+  @@map("loan_comparisons")
+}
+
+model LoanComparisonItem {
+  id              String   @id @default(cuid())
+  comparisonId    String
+  comparison      LoanComparison  @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  loanProductId   String
+  loanProduct     LoanProduct @relation(fields: [loanProductId], references: [id])
+  loanAmount      Float
+  tenureMonths    Int
+  estimatedRate   Float    // the rate used for this comparison
+  estimatedEmi    Float
+  totalRepayment  Float
+  position        Int      @default(1) // 1,2,3 for side-by-side display
+
+  @@index([comparisonId])
+  @@map("loan_comparison_items")
+}
+
+// ─── Readiness Assessment ─────────────────────────────────────────────────────
+model ReadinessAssessment {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Inputs
+  monthlyNetIncome      Float
+  employmentType        String
+  employmentDuration    Int      // months
+  existingEmiTotal      Float
+  requestedLoanAmount   Float
+  desiredTenureMonths   Int
+  estimatedCreditScore  Int?
+  monthlyExpenses       Float    @default(0)
+  loanType              String   @default("PERSONAL")
+  // Computed results
+  debtToIncomeRatio     Float
+  estimatedNewEmi       Float
+  totalEmiToIncome      Float
+  disposableIncome      Float
+  readinessScore        Int      // 0-100
+  weaknesses            String   // JSON array of weakness objects
+  suggestions           String   // JSON array of suggestion objects
+  consentGiven          Boolean  @default(false)
+  createdAt             DateTime @default(now())
+
+  @@index([userId])
+  @@map("readiness_assessments")
+}
+
+// ─── Saved Scenario (What-If Simulator) ──────────────────────────────────────
+model SavedScenario {
+  id              String   @id @default(cuid())
+  userId          String
+  user            UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  scenarioData    String   // JSON — flexible storage for what-if scenarios
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("saved_scenarios")
+}
