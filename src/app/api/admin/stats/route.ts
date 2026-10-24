@@ -3,6 +3,8 @@ import { requireAdmin } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/mockStore";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/stats
 export async function GET(_req: NextRequest) {
   try {

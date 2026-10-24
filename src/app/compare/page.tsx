@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -8,6 +9,15 @@ export const metadata: Metadata = {
   description:
     "Compare personal, home, education, vehicle, and business loans from multiple demo lenders side by side.",
 };
+
+function ComparisonLoadingFallback() {
+  return (
+    <div className="py-16 text-center space-y-3">
+      <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto" />
+      <p className="text-slate-500 text-sm">Loading loan comparison engine...</p>
+    </div>
+  );
+}
 
 export default function ComparePage() {
   return (
@@ -24,7 +34,9 @@ export default function ComparePage() {
               for illustration only.
             </p>
           </div>
-          <LoanComparison />
+          <Suspense fallback={<ComparisonLoadingFallback />}>
+            <LoanComparison />
+          </Suspense>
         </div>
       </main>
       <Footer />

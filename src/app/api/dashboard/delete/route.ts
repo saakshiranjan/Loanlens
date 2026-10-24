@@ -3,6 +3,8 @@ import { requireUser } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/mockStore";
 
+export const dynamic = "force-dynamic";
+
 // DELETE /api/dashboard/delete — delete a user's own record
 export async function DELETE(req: NextRequest) {
   try {

@@ -5,7 +5,7 @@ export interface MockLender {
   name: string;
   shortName: string;
   type: string;
-  website: string;
+  website?: string | null;
   isMock: boolean;
   isActive: boolean;
 }

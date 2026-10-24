@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { scenarioSchema } from "@/lib/validations";
 import { inMemoryStore } from "@/lib/mockStore";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();

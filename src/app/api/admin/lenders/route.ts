@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { lenderSchema } from "@/lib/validations";
 import { inMemoryStore } from "@/lib/mockStore";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(_req: NextRequest) {
   try {
     await requireAdmin();
