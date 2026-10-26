@@ -82,7 +82,7 @@ export function HowItWorks() {
             ))}
           </div>
 
-          {/* Bank Architecture Feature Spotlight */}
+          {/* ER & BPMN Feature Spotlight */}
           <div className="mt-14 rounded-2xl bg-gradient-to-r from-navy-950 via-navy-900 to-slate-900 p-6 sm:p-8 text-white border border-white/10 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-400 shrink-0">
@@ -90,13 +90,13 @@ export function HowItWorks() {
               </div>
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[11px] font-bold uppercase tracking-wider">
-                  New Feature: Bank Architecture
+                  New Feature: ER & BPMN
                 </div>
                 <h3 className="font-display text-lg sm:text-xl font-bold text-white">
                   Understand What Happens Inside the Bank
                 </h3>
                 <p className="text-slate-300 text-xs sm:text-sm max-w-2xl">
-                  Explore our interactive <strong>ER & BPMN 2.0 Process Simulator</strong>. See how customer KYC, branch assets, and loan accounts interact across underwriting swimlanes with live token tracking.
+                  Explore our interactive <strong>ER & BPMN Simulator</strong>. See how customer KYC, branch assets, and loan accounts interact across underwriting swimlanes with live token tracking and fullscreen mode.
                 </p>
               </div>
             </div>
@@ -105,7 +105,7 @@ export function HowItWorks() {
               href="/bpmn-er"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-navy-950 font-bold text-sm transition-all shadow-md shrink-0 active:scale-95"
             >
-              <span>Explore BPMN & ER Model</span>
+              <span>Explore ER & BPMN</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

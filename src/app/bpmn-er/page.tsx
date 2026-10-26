@@ -4,9 +4,9 @@ import { Footer } from "@/components/layout/Footer";
 import { BankModelViewer } from "@/components/bpmn-er/BankModelViewer";
 
 export const metadata: Metadata = {
-  title: "Bank Architecture: BPMN & ER Models | LoanLens",
+  title: "ER & BPMN: Bank Database Model & Process | LoanLens",
   description:
-    "Explore the interactive Indian banking database ER schema and BPMN 2.0 loan origination workflow. Live process token simulations, 3NF relational tables, and PostgreSQL DDL.",
+    "Explore the interactive ER & BPMN models for banking database schemas and loan origination workflows with live token simulation and fullscreen mode.",
 };
 
 export default function BpmnErPage() {

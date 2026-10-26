@@ -25,7 +25,7 @@ const NAV_LINKS = [
   { href: "/compare", label: "Compare Loans", icon: BarChart3 },
   { href: "/readiness", label: "Readiness Check", icon: Zap },
   { href: "/simulator", label: "What-If Simulator", icon: TrendingUp },
-  { href: "/bpmn-er", label: "Bank Model", icon: GitBranch },
+  { href: "/bpmn-er", label: "ER & BPMN", icon: GitBranch },
 ];
 
 export function Navbar() {

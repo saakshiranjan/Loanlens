@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ER & BPMN: Database Model & Loan Origination Process</title>
+<style>
+:root{--bg:#eef2f5;--card:#fff;--ink:#16212b;--mute:#98a4b0;--line:#26323d;--acc:#0b7f8c;--tint:#d9f1f3;--lane:#f5f8fa;--lh:#e1e8ee;--tok:#e0662b;--navy:#17324d;--ok:#1d8a5b;--bad:#c0412f;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f151b;--card:#18212a;--ink:#e6edf3;--mute:#5d6b78;--line:#c3cfdb;--acc:#4fd0dd;--tint:#16444b;--lane:#141c24;--lh:#222d38;--tok:#ff9a5c;--navy:#2a5a86;--ok:#4cc38a;--bad:#ff7b6b}}
+:root[data-theme="dark"]{--bg:#0f151b;--card:#18212a;--ink:#e6edf3;--mute:#5d6b78;--line:#c3cfdb;--acc:#4fd0dd;--tint:#16444b;--lane:#141c24;--lh:#222d38;--tok:#ff9a5c;--navy:#2a5a86;--ok:#4cc38a;--bad:#ff7b6b}
+html,body{margin:0;padding:0;width:100%;min-height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:22px 16px 34px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px 20px}
+body.is-fullscreen main{max-width:100%;padding:16px 24px}
+.top{grid-column:1/-1;grid-row:1;border-bottom:1.5px solid var(--line);padding-bottom:14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px}
+.top-text{max-width:760px}
+.top h1{font-size:1.75rem;line-height:1.2;margin:0 0 4px;letter-spacing:-.01em}
+.sub{margin:0;color:var(--mute);max-width:72ch;font-size:.95rem}
+.top-actions{display:flex;gap:8px;align-items:center}
+.btn-fs,.btn-back{font:inherit;font-size:.85rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .2s}
+.btn-fs{background:var(--navy);color:#fff;border:1.5px solid var(--navy)}
+.btn-fs:hover{filter:brightness(1.15)}
+.btn-back{background:var(--card);color:var(--ink);border:1.5px solid var(--line)}
+.btn-back:hover{background:var(--tint);color:var(--acc)}
+.bar{grid-column:1/-1;grid-row:2;position:relative;margin:0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.tabs{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+button,select{font:inherit;color:var(--ink);background:var(--card);border:0;padding:8px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--navy);color:#fff;font-weight:600}
+.ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ctl select{border:1.5px solid var(--line);border-radius:8px;padding:7px 8px}
+#rp{border:1.5px solid var(--acc);border-radius:8px;color:#fff;background:var(--acc);font-weight:600}
+#rp:hover{filter:brightness(1.08)}
+button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(15,30,45,.06),0 8px 24px rgba(15,30,45,.07)}
+.prog{position:absolute;left:0;right:0;bottom:-8px;height:3px;background:var(--lh);border-radius:2px}
+.prog span{display:block;height:100%;width:0;background:var(--acc);border-radius:2px;transition:width .3s}
+.sc{overflow-x:auto}
+svg{display:block;width:100%;height:auto}
+#p-er,#p-bp{grid-column:1;grid-row:3}
+#p-er{background-image:radial-gradient(var(--lh) 1.1px,transparent 1.3px);background-size:22px 22px}
+#bp{min-width:860px}
+svg text{font:600 13px "Avenir Next","Segoe UI",system-ui,sans-serif;fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none;user-select:none}
+.n{cursor:pointer}
+.n .s{fill:var(--card);stroke:var(--mute);stroke-width:1.6;transition:fill .35s,stroke .35s}
+.n .end{stroke-width:4}
+.n.on .s{fill:var(--tint);stroke:var(--acc)}
+.n .x{stroke:var(--mute);stroke-width:2.6;transition:stroke .35s}
+.n.on .x{stroke:var(--acc)}
+.e{fill:none;stroke:var(--line);stroke-width:2;stroke-linejoin:round;transition:stroke .2s}
+.e.hl{stroke:var(--acc);stroke-width:3}
+.lab{opacity:0;transition:opacity .4s}
+.lab.on{opacity:1}
+svg text.cd{fill:var(--acc);font-size:13px;font-weight:700}
+svg text.fl{font-size:12px;font-style:italic;fill:var(--mute)}
+.lane{fill:var(--lane);stroke:var(--mute);stroke-width:1.2}
+.lh{fill:var(--navy);stroke:var(--navy)}
+svg text.lt{font-size:13px;fill:#fff;letter-spacing:.04em}
+.tok{fill:var(--tok);stroke:var(--card);stroke-width:2}
+.n text{transition:fill .35s}
+.n:hover .s{stroke:var(--acc)}
+.n.sel .s{stroke-width:3;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.n.ent.on .s{fill:var(--navy);stroke:var(--navy)}
+.n.ent.on text{fill:#fff}
+.n.rel.on .s,.n.gw.on .s{fill:var(--tint);stroke:var(--acc)}
+.n.attr.on .s{fill:var(--card);stroke:var(--acc)}
+.n.task.on .s{fill:var(--tint);stroke:var(--acc)}
+.n.i-s.on .s,.n.i-e2.on .s{fill:var(--card);stroke:var(--ok)}
+.n.i-e1.on .s{fill:var(--card);stroke:var(--bad)}
+.info{grid-column:2;grid-row:3;align-self:start;position:sticky;top:12px;margin:0;min-height:0;padding:16px 18px;border:1.5px solid var(--line);border-left:5px solid var(--acc);border-radius:12px;background:var(--card)}
+.info small{display:block;color:var(--mute);font-size:.82rem}
+.info b{display:block;font-size:1.15rem;margin:2px 0 6px}
+.info p{margin:0}
+.leg{grid-column:1;grid-row:4;display:flex;flex-wrap:wrap;gap:8px 20px;margin:0;font-size:.88rem}
+.sw{display:inline-block;width:20px;height:12px;margin-right:7px;vertical-align:-2px;border:1.6px solid var(--mute);background:var(--card)}
+.sw.ent{background:var(--navy);border-color:var(--navy)}
+.sw.rel{width:12px;margin-right:9px;transform:rotate(45deg) scale(.85);background:var(--tint);border-color:var(--acc)}
+.sw.attr{border-radius:50%;border-color:var(--acc)}
+.sw.dbl{height:5px;border-width:2px 0;border-color:var(--line);background:none}
+.sw.arr{height:0;border-width:2px 0 0;border-color:var(--line);background:none}
+.sw.task{border-radius:4px;border-color:var(--acc);background:var(--tint)}
+.sw.ev{width:13px;height:13px;border-radius:50%;border-color:var(--ok)}
+.sw.tok{width:11px;height:11px;border:0;border-radius:50%;background:var(--tok)}
+#tbl{grid-column:1/-1;grid-row:5}
+#tbl h2{font-size:1.05rem;margin:0 0 10px}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.t{border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.t h3{margin:0;padding:6px 10px;font-size:.92rem;background:var(--navy);color:#fff}
+.t p{margin:0;padding:8px 10px;font-size:.9rem}
+.t i{color:var(--acc)}
+.note{margin:10px 0 0;color:var(--mute);font-size:.86rem}
+@media (max-width:860px){main{display:block}main>*{margin-bottom:14px}.info{position:static}.top h1{font-size:1.45rem}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="top-text">
+    <h1>ER & BPMN: Bank Architecture</h1>
+    <p class="sub">Interactive Entity–Relationship database model and BPMN loan origination approval process. Select any shape for details.</p>
+  </div>
+  <div class="top-actions">
+    <button id="btn-toggle-fs" class="btn-fs" title="Toggle Fullscreen Mode">⛶ Fullscreen</button>
+    <a href="/bpmn-er" class="btn-back" title="Return to LoanLens">Back to LoanLens</a>
+  </div>
+</header>
+<div class="bar">
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tb-er" aria-selected="true">ER diagram</button>
+    <button role="tab" id="tb-bp" aria-selected="false">BPMN process</button>
+  </div>
+  <div class="ctl">
+    <label id="oc" hidden>Token path <select id="out"><option value="ok">Loan approved</option><option value="no">Loan rejected</option></select></label>
+    <label>Speed <select id="sp"><option value="0.6">Slow</option><option value="1" selected>Normal</option><option value="2.5">Fast</option><option value="0">Instant</option></select></label><button id="rp">Replay</button><div class="prog"><span id="pb"></span></div>
+  </div>
+</div>
+<section id="p-er" class="card"><svg id="er" viewBox="0 0 780 560" role="img" aria-label="ER diagram of Account, Branch, Customer and Loan"></svg></section>
+<section id="p-bp" class="card" hidden><div class="sc"><svg id="bp" viewBox="0 0 1000 430" role="img" aria-label="BPMN diagram of the loan approval process"></svg></div></section>
+<div id="info" class="info" aria-live="polite"><small>Details</small><p>Select any shape to see what it means and which lines connect to it.</p></div>
+<div class="leg" id="leg"></div>
+<section id="tbl" class="card"><h2>Resulting relational schema</h2><div class="tg">
+<div class="t"><h3>Account</h3><p><u>Ac_no</u>, Balance, <i>b_name</i></p></div>
+<div class="t"><h3>Branch</h3><p><u>b_name</u>, b_city, Assets</p></div>
+<div class="t"><h3>Loan</h3><p><u>L_no</u>, Amt, <i>b_name</i></p></div>
+<div class="t"><h3>Customer</h3><p><u>C_name</u>, C_city, C_street</p></div>
+<div class="t"><h3>Depositor</h3><p><u><i>C_name</i></u>, <u><i>Ac_no</i></u></p></div>
+<div class="t"><h3>Borrower</h3><p><u><i>C_name</i></u>, <u><i>L_no</i></u></p></div>
+</div><p class="note">Underlined: primary key. Italic: foreign key.</p></section>
+</main>
+<script>
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches,NS="http://www.w3.org/2000/svg",$=i=>document.getElementById(i);
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const K=()=>RM?0:+$("sp").value,sleep=ms=>new Promise(r=>setTimeout(r,K()?ms/K():5));
+const N=(k,id,l,x,y,info,o)=>Object.assign({k,id,l,x,y,info},o);
+const DS={ent:[60,22],rel:[72,38],gw:[30,30],task:[55,27],start:[14,14],end:[14,14]};
+const ent=(id,l,x,y,i)=>N("ent",id,l,x,y,i),rel=(id,l,x,y,i)=>N("rel",id,l,x,y,i);
+const attr=(id,l,x,y,of,pk)=>N("attr",id,l,x,y,(pk?"Primary key (underlined) of ":"Attribute of ")+of+".",{pk,hw:Math.max(34,l.length*5.2+16),hh:20});
+
+const ER={order:[],
+nodes:[
+ent("acc","Account",150,170,"Key Ac_no. Total participation in Account branch (double line): every account belongs to exactly one branch, so b_name is folded in. Table: Account(Ac_no, Balance, b_name)."),
+ent("br","Branch",600,170,"Key b_name. The “one” side of Account branch and Loan branch. Table: Branch(b_name, b_city, Assets)."),
+ent("cus","Customer",150,400,"Key C_name. Reaches accounts through Depositor and loans through Borrower, both many-to-many. Table: Customer(C_name, C_city, C_street)."),
+ent("loan","Loan",600,400,"Key L_no. Total participation in Loan branch, so b_name is folded in. Table: Loan(L_no, Amt, b_name)."),
+rel("accbr","Account|branch",375,170,"Many-to-one: many accounts, one branch. The arrow points at the “one” side. No table of its own because Account has total participation."),
+rel("locbr","Loan|branch",600,285,"Many-to-one: many loans, one branch. Loan has total participation, so the relationship merges into the Loan table."),
+rel("dep","Depositor",150,285,"Many-to-many between Customer and Account. Becomes a table: Depositor(C_name, Ac_no)."),
+rel("bor","Borrower",375,400,"Many-to-many between Customer and Loan. Becomes a table: Borrower(C_name, L_no)."),
+attr("acno","Ac_no",80,62,"Account",1),attr("bal","Balance",215,62,"Account"),
+attr("bname","b_name",505,62,"Branch",1),attr("bcity","b_city",610,38,"Branch"),attr("assets","Assets",710,62,"Branch"),
+attr("ccity","C_city",55,495,"Customer"),attr("cname","C_name",150,520,"Customer",1),attr("cstreet","C_street",250,495,"Customer"),
+attr("lno","L_no",540,495,"Loan",1),attr("amt","Amt",665,495,"Loan")],
+edges:[
+{id:"a1",f:"acc",t:"acno"},{id:"a2",f:"acc",t:"bal"},
+{id:"r1",f:"acc",t:"accbr",dbl:1,lb:[240,156,"N"]},
+{id:"r2",f:"accbr",t:"br",p:[[447,170],[540,170]],ar:1,lb:[512,156,"1"]},
+{id:"a3",f:"br",t:"bname"},{id:"a4",f:"br",t:"bcity"},{id:"a5",f:"br",t:"assets"},
+{id:"r3",f:"acc",t:"dep",lb:[165,218,"M"]},
+{id:"r4",f:"dep",t:"cus",lb:[165,358,"N"]},
+{id:"a6",f:"cus",t:"cname"},{id:"a7",f:"cus",t:"ccity"},{id:"a8",f:"cus",t:"cstreet"},
+{id:"r5",f:"cus",t:"bor",lb:[236,388,"M"]},
+{id:"r6",f:"bor",t:"loan",lb:[512,388,"N"]},
+{id:"a9",f:"loan",t:"lno"},{id:"a10",f:"loan",t:"amt"},
+{id:"r7",f:"loan",t:"locbr",dbl:1,lb:[617,362,"N"]},
+{id:"r8",f:"locbr",t:"br",p:[[600,247],[600,192]],ar:1,lb:[617,218,"1"]}],
+leg:[["ent","Entity"],["rel","Relationship"],["attr","Attribute (underlined: primary key)"],["dbl","Total participation"],["arr","Many-to-one, arrow toward the “one” side"],["","M, N, 1: cardinality"]]};
+
+const T=(id,l,x,y,i)=>N("task",id,l,x,y,i);
+const PATHS={ok:["f1","f2","f3","f5","f6","f7","f8","f9","f10"],no:["f1","f2","f3","f4"]};
+const BP={
+pre(svg){[["Customer",20],["Branch staff",150],["Bank system",280]].forEach(([t,y])=>{
+ el("rect",{x:10,y,width:980,height:130,class:"lane"},svg);el("rect",{x:10,y,width:34,height:130,class:"lh"},svg);
+ const x=el("text",{x:27,y:y+65,class:"lt",transform:`rotate(-90 27 ${y+65})`},svg);x.textContent=t})},
+nodes:[
+N("start","s","Needs a loan",90,85,"Start event: a customer decides to apply for a loan."),
+T("t1","Submit loan|application",210,85,"The customer sends the application with identity and income documents."),
+T("t2","Verify customer|& documents",350,215,"Staff check the Customer record (C_name, C_city, C_street) and the documents."),
+N("gw","g1","Eligible?",490,215,"Exclusive gateway: exactly one path is taken. Eligible leads to approval, otherwise rejection."),
+N("end","e1","Rejection sent",490,85,"End event: the customer is told the application was rejected.",{up:1}),
+T("t3","Approve loan &|assign branch",630,215,"Staff approve the loan and tie it to one Branch, which is the Loan branch relationship (b_name)."),
+T("t4","Create Loan &|Borrower records",630,345,"The system inserts Loan(L_no, Amt, b_name) and Borrower(C_name, L_no) rows."),
+T("t5","Update branch|assets",780,345,"The system updates Branch.Assets for the new loan."),
+T("t6","Disburse loan",780,215,"Staff release the amount (Amt) to the customer."),
+T("t7","Receive funds",780,85,"The customer receives the funds."),
+N("end","e2","Loan active",910,85,"End event: the loan is active.")],
+edges:[
+{id:"f1",f:"s",t:"t1",p:[[104,85],[155,85]],ar:1},
+{id:"f2",f:"t1",t:"t2",p:[[210,112],[210,215],[295,215]],ar:1},
+{id:"f3",f:"t2",t:"g1",p:[[405,215],[460,215]],ar:1},
+{id:"f4",f:"g1",t:"e1",p:[[490,185],[490,99]],ar:1,lb:[506,150,"No"],fl:1},
+{id:"f5",f:"g1",t:"t3",p:[[520,215],[575,215]],ar:1,lb:[548,202,"Yes"],fl:1},
+{id:"f6",f:"t3",t:"t4",p:[[630,242],[630,318]],ar:1},
+{id:"f7",f:"t4",t:"t5",p:[[685,345],[725,345]],ar:1},
+{id:"f8",f:"t5",t:"t6",p:[[780,318],[780,242]],ar:1},
+{id:"f9",f:"t6",t:"t7",p:[[780,188],[780,112]],ar:1},
+{id:"f10",f:"t7",t:"e2",p:[[835,85],[896,85]],ar:1}],
+leg:[["ev","Event (thick border: end)"],["task","Task"],["rel","Exclusive gateway"],["tok","Process token"]]};
+
+const sh={
+ent:(n,g)=>el("rect",{x:n.x-n.hw,y:n.y-n.hh,width:n.hw*2,height:n.hh*2},g),
+task:(n,g)=>el("rect",{x:n.x-n.hw,y:n.y-n.hh,width:n.hw*2,height:n.hh*2,rx:10},g),
+rel:(n,g)=>el("polygon",{points:`${n.x-n.hw},${n.y} ${n.x},${n.y-n.hh} ${n.x+n.hw},${n.y} ${n.x},${n.y+n.hh}`},g),
+attr:(n,g)=>el("ellipse",{cx:n.x,cy:n.y,rx:n.hw,ry:n.hh},g),
+start:(n,g)=>el("circle",{cx:n.x,cy:n.y,r:14},g)};
+sh.gw=sh.rel;sh.end=sh.start;
+
+function mk(svg,S){
+ const D={svg,S,N:{},E:{}};
+ svg.innerHTML=`<defs><marker id="ah-${svg.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--line)"/></marker></defs>`;
+ if(S.pre)S.pre(svg);
+ const ge=el("g",{},svg),gn=el("g",{},svg),gl=el("g",{},svg);
+ S.nodes.forEach(n=>{
+  const d=DS[n.k];if(d){n.hw=d[0];n.hh=d[1]}
+  D.N[n.id]=n;const g=n.g=el("g",{class:"n "+n.k+" i-"+n.id},gn);
+  el("title",{},g).textContent=n.l.split("|").join(" ");
+  sh[n.k](n,g).setAttribute("class",n.k=="end"?"s end":"s");
+  const L=n.l.split("|");
+  if(n.k=="gw"){el("path",{d:`M${n.x-9} ${n.y-9}L${n.x+9} ${n.y+9}M${n.x+9} ${n.y-9}L${n.x-9} ${n.y+9}`,class:"x"},g)}
+  if(["start","end","gw"].includes(n.k)){
+   const t=el("text",{x:n.x,y:n.up?n.y-28:n.y+n.hh+14},g);t.textContent=n.l}
+  else L.forEach((s,i)=>{const t=el("text",{x:n.x,y:n.y+(i-(L.length-1)/2)*15},g);t.textContent=s;if(n.pk)t.setAttribute("text-decoration","underline")});
+  const pick=()=>sel(D,n.id);
+  g.addEventListener("click",pick);
+  g.addEventListener("pointerenter",e=>{if(e.pointerType=="mouse")pick()});
+ });
+ S.edges.forEach(e=>{
+  const a=D.N[e.f],b=D.N[e.t],pts=e.p||[[a.x,a.y],[b.x,b.y]];
+  const mkp=P=>{const p=el("path",{d:"M"+P.map(q=>q.join(" ")).join("L"),class:"e"},ge);
+   let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);
+   p._L=L;p.style.strokeDasharray=L;p.style.strokeDashoffset=L;return p};
+  if(e.dbl){const[[x1,y1],[x2,y2]]=pts,L=Math.hypot(x2-x1,y2-y1),dx=-(y2-y1)/L*3,dy=(x2-x1)/L*3;
+   e.ps=[mkp([[x1+dx,y1+dy],[x2+dx,y2+dy]]),mkp([[x1-dx,y1-dy],[x2-dx,y2-dy]])]}
+  else e.ps=[mkp(pts)];
+  if(e.lb){e.lab=el("text",{x:e.lb[0],y:e.lb[1],class:"lab "+(e.fl?"fl":"cd")},gl);e.lab.textContent=e.lb[2]}
+  D.E[e.id]=e;
+ });
+ return D;
+}
+function sel(D,id){
+ const n=D.N[id];
+ for(const k in D.E){const e=D.E[k],h=e.f==id||e.t==id;e.ps.forEach(p=>p.classList.toggle("hl",h))}
+ const b=document.createElement("b");b.textContent=n.l.split("|").join(" ");
+ const KN={ent:"Entity",rel:"Relationship",attr:"Attribute",task:"Task",gw:"Gateway",start:"Start event",end:"End event"},s=document.createElement("small"),p=document.createElement("p");s.textContent=KN[n.k];p.textContent=n.info;$("info").replaceChildren(s,b,p);for(const m in D.N)D.N[m].g.classList.toggle("sel",m==id);
+}
+function reset(D){
+ for(const k in D.E){const e=D.E[k];
+  e.ps.forEach(p=>{p.getAnimations().forEach(a=>a.cancel());p.style.strokeDashoffset=p._L;p.removeAttribute("marker-end");p.classList.remove("hl")});
+  if(e.lab)e.lab.classList.remove("on")}
+ for(const k in D.N)D.N[k].g.classList.remove("on");
+ D.svg.querySelectorAll(".tok").forEach(t=>t.remove());
+}
+async function draw(D,id,my){
+ const e=D.E[id];D.N[e.f].g.classList.add("on");
+ try{await Promise.all(e.ps.map(p=>p.animate([{strokeDashoffset:p._L},{strokeDashoffset:0}],{duration:K()?Math.min(800,Math.max(280,p._L*3.2))/K():1,easing:"ease-in-out",fill:"forwards"}).finished))}catch(x){return}
+ if(my!==run)return;
+ e.ps.forEach(p=>{p.getAnimations().forEach(a=>a.cancel());p.style.strokeDashoffset=0;if(e.ar)p.setAttribute("marker-end",`url(#ah-${D.svg.id})`)});
+ D.N[e.t].g.classList.add("on");if(e.lab)e.lab.classList.add("on");
+}
+async function token(D,my){
+ const tk=el("circle",{r:7,class:"tok"},D.svg);
+ for(const id of PATHS[$("out").value]){
+  const p=D.E[id].ps[0],L=p._L,d=K()?L*5/K():1;p.classList.add("hl");
+  await new Promise(r=>{const s=performance.now();(function f(t){
+   const k=Math.min(1,(t-s)/d),q=p.getPointAtLength(L*k);tk.setAttribute("cx",q.x);tk.setAttribute("cy",q.y);
+   if(my!==run)return r();k<1?requestAnimationFrame(f):r()})(s)});
+  if(my!==run)return;
+ }
+ await sleep(500);if(my===run)tk.remove();
+}
+let run=0,cur="er";
+const DG={er:mk($("er"),ER),bp:mk($("bp"),BP)};
+async function play(){
+ const my=++run,D=DG[cur];reset(D);$("pb").style.width="0";let c=0;await sleep(300);
+ for(const e of D.S.edges){if(my!==run)return;await draw(D,e.id,my);$("pb").style.width=(++c/D.S.edges.length*100)+"%";await sleep(70)}
+ if(my===run&&cur=="bp")await token(D,my);
+}
+function tab(k){
+ cur=k;$("p-er").hidden=k!="er";$("p-bp").hidden=k!="bp";$("oc").hidden=k!="bp";$("tbl").hidden=k!="er";
+ $("tb-er").setAttribute("aria-selected",k=="er");$("tb-bp").setAttribute("aria-selected",k=="bp");
+ $("leg").replaceChildren(...DG[k].S.leg.map(([c,t])=>{const s=document.createElement("span");if(c){const i=document.createElement("i");i.className="sw "+c;s.append(i)}s.append(t);return s}));$("info").innerHTML="<small>Details</small><p>Select any shape to see what it means and which lines connect to it.</p>";play();
+}
+$("tb-er").onclick=()=>tab("er");$("tb-bp").onclick=()=>tab("bp");
+$("rp").onclick=play;$("out").onchange=play;$("sp").onchange=play;
+
+// Fullscreen Toggle Logic
+const fsBtn = $("btn-toggle-fs");
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+}
+fsBtn.onclick = toggleFullscreen;
+document.addEventListener("fullscreenchange", () => {
+  const isFs = !!document.fullscreenElement;
+  document.body.classList.toggle("is-fullscreen", isFs);
+  fsBtn.textContent = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+});
+
+// Auto enter fullscreen if query param ?fullscreen=true is provided
+if (new URLSearchParams(location.search).get("fullscreen") === "true") {
+  window.addEventListener("click", () => {
+    if (!document.fullscreenElement) toggleFullscreen();
+  }, { once: true });
+}
+
+tab(location.hash=="#bpmn"?"bp":"er");
+</script>
+</body>
+</html>
