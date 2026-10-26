@@ -9,6 +9,7 @@ import {
   BarChart3,
   Calculator,
   ChevronDown,
+  GitBranch,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -24,6 +25,7 @@ const NAV_LINKS = [
   { href: "/compare", label: "Compare Loans", icon: BarChart3 },
   { href: "/readiness", label: "Readiness Check", icon: Zap },
   { href: "/simulator", label: "What-If Simulator", icon: TrendingUp },
+  { href: "/bpmn-er", label: "Bank Model", icon: GitBranch },
 ];
 
 export function Navbar() {

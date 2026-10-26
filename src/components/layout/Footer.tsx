@@ -3,6 +3,7 @@ import {
   BarChart3,
   Calculator,
   Facebook,
+  GitBranch,
   Linkedin,
   Mail,
   MapPin,
@@ -18,6 +19,7 @@ const TOOL_LINKS = [
   { href: "/compare", label: "Compare Loans", icon: BarChart3 },
   { href: "/readiness", label: "Readiness Check", icon: Zap },
   { href: "/simulator", label: "What-If Simulator", icon: TrendingUp },
+  { href: "/bpmn-er", label: "Bank Architecture (BPMN & ER)", icon: GitBranch },
 ];
 
 const LOAN_LINKS = [
